@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel, Field
-from typing import Literal
+from typing import Literal, Optional
 
 class TransactionCreate(BaseModel):
     amount: float = Field(gt=0, description="Amount must be greater than zero")
@@ -18,8 +18,28 @@ app = FastAPI() # create app instance
 transactions = [] #in memory list to hold transactions
 
 @app.get("/transactions")
-def get_transactions():
-    return transactions
+def get_transactions(
+    category: Optional[str] = None, 
+    type:Optional[str] = None,
+    min_amount: Optional[float] = None,
+    max_amount: Optional[float] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None
+):
+    result = transactions
+    if category is not None:
+        result = [t for t in result if t.category == category]
+    if type is not None:
+        result = [t for t in result if t.type == type]
+    if min_amount is not None:
+        result = [t for t in result if t.amount >= min_amount]
+    if max_amount is not None:
+        result = [t for t in result if t.amount <= max_amount]
+    if start_date is not None:
+        result = [t for t in result if t.date >= start_date]
+    if end_date is not None:
+        result = [t for t in result if t.date <= end_date]
+    return result
 
 @app.post("/transactions")
 def create_transactions(transaction: TransactionCreate):
