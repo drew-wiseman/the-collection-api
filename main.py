@@ -1,74 +1,88 @@
-from datetime import date, datetime
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel, Field
 from typing import Literal, Optional
 
-class TransactionCreate(BaseModel):
-    amount: float = Field(gt=0, description="Amount must be greater than zero")
-    category: str
-    type: Literal["income", "expense"]
-    description: str
-    date: date
+class GameCreate(BaseModel):
+    title: str
+    platform: str
+    genre: str
+    year_released: int
+    current_market_price: float = Field(gt=0, description="Market price must be greater than zero.")
+    played: bool
+    condition: Optional[Literal["loose", "CIB", "sealed"]] = None
+    purchase_price: Optional[float] = None
 
-class Transaction(TransactionCreate):
+
+class Game(GameCreate):
     id: int
-    created_at: datetime
 
 app = FastAPI() # create app instance
-transactions = [] #in memory list to hold transactions
+games = [] #in memory list to hold games
 
-@app.get("/transactions")
-def get_transactions(
-    category: Optional[str] = None, 
-    type:Optional[str] = None,
-    min_amount: Optional[float] = None,
-    max_amount: Optional[float] = None,
-    start_date: Optional[date] = None,
-    end_date: Optional[date] = None
+@app.get("/games")
+def get_games(
+    title: Optional[str] = None, 
+    platform: Optional[str] = None,
+    genre: Optional[str] = None,
+    min_curr_price: Optional[float] = None,
+    max_curr_price: Optional[float] = None,
+    start_year: Optional[int] = None,
+    end_year: Optional[int] = None,
+    condition: Optional[Literal["loose", "CIB", "sealed"]] = None,
+    max_purchase_price: Optional[float] = None,
+    min_purchase_price: Optional[float] = None,
 ):
-    result = transactions
-    if category is not None:
-        result = [t for t in result if t.category == category]
-    if type is not None:
-        result = [t for t in result if t.type == type]
-    if min_amount is not None:
-        result = [t for t in result if t.amount >= min_amount]
-    if max_amount is not None:
-        result = [t for t in result if t.amount <= max_amount]
-    if start_date is not None:
-        result = [t for t in result if t.date >= start_date]
-    if end_date is not None:
-        result = [t for t in result if t.date <= end_date]
+    result = games
+    if title is not None:
+        result = [g for g in result if g.title == title]
+    if platform is not None:
+        result = [g for g in result if g.platform == platform]
+    if genre is not None:
+        result = [g for g in result if g.genre == genre]
+    if min_curr_price is not None:
+        result = [g for g in result if g.current_market_price >= min_curr_price]
+    if max_curr_price is not None:
+        result = [g for g in result if g.current_market_price <= max_curr_price]
+    if start_year is not None:
+        result = [g for g in result if g.year_released >= start_year]
+    if end_year is not None:
+        result = [g for g in result if g.year_released <= end_year]
+    if condition is not None:
+        result = [g for g in result if g.condition == condition]
+    if max_purchase_price is not None:
+        result = [g for g in result if g.purchase_price <= max_purchase_price]
+    if min_purchase_price is not None:
+        result = [g for g in result if g.purchase_price >= min_purchase_price]
     return result
 
-@app.post("/transactions")
-def create_transactions(transaction: TransactionCreate):
-    transaction_data = transaction.model_dump()
-    t = Transaction(id=len(transactions) + 1, created_at=datetime.now(), **transaction_data)
-    transactions.append(t)
-    return t
+@app.post("/games")
+def create_game(game: GameCreate):
+    game_data = game.model_dump()
+    g = Game(id=len(games) + 1, **game_data)
+    games.append(g)
+    return g
 
-@app.get("/transactions/{id}")
-def get_transaction(id: int):
-    for t in transactions:
-        if t.id == id:
-            return t
+@app.get("/games/{id}")
+def get_game(id: int):
+    for g in games:
+        if g.id == id:
+            return g
     raise HTTPException (
         status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Transaction ID '{id}' not found."
+        detail=f"Game ID '{id}' not found."
     )
 
-@app.delete("/transactions/{id}")
-def del_transaction(id: int):
+@app.delete("/games/{id}")
+def del_game(id: int):
     target = -1
-    for i, t in enumerate(transactions):
-        if t.id == id:
+    for i, g in enumerate(games):
+        if g.id == id:
             target = i
             break
     if target == -1:
         raise HTTPException (
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Transaction ID '{id}' not found."
+            detail=f"Game ID '{id}' not found."
         )
     else:
-        transactions.pop(target)
+        games.pop(target)
