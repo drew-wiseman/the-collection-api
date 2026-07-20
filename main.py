@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException, status, Depends
 from models import GameDB
 from pydantic import BaseModel, Field
 from typing import Literal, Optional
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 class GameCreate(BaseModel):
@@ -65,6 +66,16 @@ def get_games(
     if min_purchase_price is not None:
         query = query.filter(GameDB.purchase_price >= min_purchase_price)
     return query.all()
+
+@app.get("/games/stats")
+def get_games_stats(db: Session = Depends(get_db)):
+    stats = {
+        "total_games" : db.query(func.count(GameDB.id)).scalar(),
+        "total_market_value" : db.query(func.coalesce(func.sum(GameDB.current_market_price), 0)).scalar(),
+        "total_spent" : db.query(func.coalesce(func.sum(GameDB.purchase_price), 0)).scalar(),
+        "most_expensive_game" : db.query(GameDB).order_by(GameDB.current_market_price.desc()).first()
+    }
+    return stats
 
 @app.post("/games")
 def create_game(game: GameCreate, db: Session = Depends(get_db)):
