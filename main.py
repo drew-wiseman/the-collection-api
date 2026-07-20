@@ -6,7 +6,7 @@ from models import GameDB
 from pydantic import BaseModel, Field
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-from typing import Literal, Optional
+from typing import Literal, Optional, List
 
 
 class GameCreate(BaseModel):
@@ -52,7 +52,7 @@ def get_db():
     finally:
         db.close()
 
-@app.get("/games", tags=["games"], response_model=list[Game])
+@app.get("/games", tags=["games"], response_model=List[Game])
 def get_games(
     title: Optional[str] = None, 
     platform: Optional[str] = None,
