@@ -19,9 +19,17 @@ class GameCreate(BaseModel):
     condition: Optional[Literal["loose", "CIB", "sealed"]] = None
     purchase_price: Optional[float] = None
 
-
 class Game(GameCreate):
     id: int
+
+class DeleteResponse(BaseModel):
+    message: str
+
+class GameStats(BaseModel):
+    total_games: int
+    total_market_value: float
+    total_spent: float
+    most_expensive_game: Optional[Game] = None
 
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
@@ -29,7 +37,12 @@ def verify_api_key(x_api_key: str = Header(...)):
     if x_api_key != API_KEY:
         raise HTTPException(status_code=401, detail="Invalid or missing API key.")
 
-app = FastAPI() # create app instance
+app = FastAPI(
+    title="The Collection API",
+    description="A REST API for tracking a retro video game collection.",
+    version="1.0.0"
+) 
+
 Base.metadata.create_all(bind=engine)
 
 def get_db():
@@ -39,7 +52,7 @@ def get_db():
     finally:
         db.close()
 
-@app.get("/games")
+@app.get("/games", tags=["games"], response_model=list[Game])
 def get_games(
     title: Optional[str] = None, 
     platform: Optional[str] = None,
@@ -53,6 +66,7 @@ def get_games(
     min_purchase_price: Optional[float] = None,
     db: Session = Depends(get_db)
 ):
+    """Retrieve a filtered list of games."""
     query = db.query(GameDB)
     if title is not None:
         query = query.filter(GameDB.title == title)
@@ -76,8 +90,9 @@ def get_games(
         query = query.filter(GameDB.purchase_price >= min_purchase_price)
     return query.all()
 
-@app.get("/games/stats")
+@app.get("/games/stats", tags=["games"], response_model=GameStats)
 def get_games_stats(db: Session = Depends(get_db)):
+    """Retrive statistics about the collection."""
     stats = {
         "total_games" : db.query(func.count(GameDB.id)).scalar(),
         "total_market_value" : db.query(func.coalesce(func.sum(GameDB.current_market_price), 0)).scalar(),
@@ -86,8 +101,9 @@ def get_games_stats(db: Session = Depends(get_db)):
     }
     return stats
 
-@app.post("/games")
+@app.post("/games", tags=["games"], response_model=Game)
 def create_game(game: GameCreate, db: Session = Depends(get_db), auth: None = Depends(verify_api_key)):
+    """Add a game into the collection."""
     game_data = game.model_dump()
     g = GameDB(**game_data)
     db.add(g)
@@ -95,8 +111,9 @@ def create_game(game: GameCreate, db: Session = Depends(get_db), auth: None = De
     db.refresh(g)
     return g
 
-@app.get("/games/{id}")
+@app.get("/games/{id}", tags=["games"], response_model=Game)
 def get_game(id: int, db: Session = Depends(get_db)):
+    """Retrive a single game by its id."""
     result = db.query(GameDB).filter(GameDB.id == id).first()
     if result is None:
         raise HTTPException (
@@ -106,8 +123,9 @@ def get_game(id: int, db: Session = Depends(get_db)):
     return result
 
 
-@app.delete("/games/{id}")
+@app.delete("/games/{id}", tags=["games"], response_model=DeleteResponse)
 def del_game(id: int, db: Session = Depends(get_db), auth: None = Depends(verify_api_key)):
+    """Remove a single game by its id."""
     result = db.query(GameDB).filter(GameDB.id == id).first()
     if result is None:
         raise HTTPException (
