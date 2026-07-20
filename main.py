@@ -1,10 +1,13 @@
+import os
 from database import SessionLocal, engine, Base
-from fastapi import FastAPI, HTTPException, status, Depends
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException, status, Depends, Header
 from models import GameDB
 from pydantic import BaseModel, Field
-from typing import Literal, Optional
 from sqlalchemy import func
 from sqlalchemy.orm import Session
+from typing import Literal, Optional
+
 
 class GameCreate(BaseModel):
     title: str
@@ -19,6 +22,12 @@ class GameCreate(BaseModel):
 
 class Game(GameCreate):
     id: int
+
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
+def verify_api_key(x_api_key: str = Header(...)):
+    if x_api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid or missing API key.")
 
 app = FastAPI() # create app instance
 Base.metadata.create_all(bind=engine)
@@ -78,7 +87,7 @@ def get_games_stats(db: Session = Depends(get_db)):
     return stats
 
 @app.post("/games")
-def create_game(game: GameCreate, db: Session = Depends(get_db)):
+def create_game(game: GameCreate, db: Session = Depends(get_db), auth: None = Depends(verify_api_key)):
     game_data = game.model_dump()
     g = GameDB(**game_data)
     db.add(g)
@@ -98,7 +107,7 @@ def get_game(id: int, db: Session = Depends(get_db)):
 
 
 @app.delete("/games/{id}")
-def del_game(id: int, db: Session = Depends(get_db)):
+def del_game(id: int, db: Session = Depends(get_db), auth: None = Depends(verify_api_key)):
     result = db.query(GameDB).filter(GameDB.id == id).first()
     if result is None:
         raise HTTPException (
