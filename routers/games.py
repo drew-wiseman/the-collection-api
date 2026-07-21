@@ -21,8 +21,6 @@ def get_games(
     start_year: Optional[int] = None,
     end_year: Optional[int] = None,
     condition: Optional[Literal["loose", "CIB", "sealed"]] = None,
-    max_purchase_price: Optional[float] = None,
-    min_purchase_price: Optional[float] = None,
     db: Session = Depends(get_db)
 ):
     """Retrieve a filtered list of games."""
@@ -43,10 +41,6 @@ def get_games(
         query = query.filter(GameDB.year_released <= end_year)
     if condition is not None:
         query = query.filter(GameDB.condition == condition)
-    if max_purchase_price is not None:
-        query = query.filter(GameDB.purchase_price <= max_purchase_price)
-    if min_purchase_price is not None:
-        query = query.filter(GameDB.purchase_price >= min_purchase_price)
     return query.all()
 
 @router.get("/stats", response_model=GameStats)

@@ -11,4 +11,3 @@ class GameDB(Base):
     current_market_price = Column(Float, nullable=False)
     played = Column(Boolean, nullable=False)
     condition = Column(String, nullable=True)
-    purchase_price = Column(Float, nullable=True)

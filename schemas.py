@@ -9,7 +9,6 @@ class GameCreate(BaseModel):
     current_market_price: float = Field(gt=0, description="Market price must be greater than zero.")
     played: bool
     condition: Optional[Literal["loose", "CIB", "sealed"]] = None
-    purchase_price: Optional[float] = None
 
 class Game(GameCreate):
     id: int
