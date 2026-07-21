@@ -45,7 +45,7 @@ def get_games(
 
 @router.get("/stats", response_model=GameStats)
 def get_games_stats(db: Session = Depends(get_db)):
-    """Retrive statistics about the collection."""
+    """Retrive statistics about the games within the collection."""
     stats = {
         "total_games" : db.query(func.count(GameDB.id)).scalar(),
         "total_market_value" : db.query(func.coalesce(func.sum(GameDB.current_market_price), 0)).scalar(),

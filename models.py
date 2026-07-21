@@ -11,3 +11,26 @@ class GameDB(Base):
     current_market_price = Column(Float, nullable=False)
     played = Column(Boolean, nullable=False)
     condition = Column(String, nullable=True)
+
+class MovieDB(Base):
+    __tablename__ = "movies"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    genre = Column(String, nullable=False)
+    year_released = Column(Integer, nullable=False)
+    studio = Column(String, nullable=False)
+    runtime_minutes = Column(Integer, nullable=False)
+    format = Column(String, nullable=False)
+    actors = Column(String, nullable=False)
+    current_market_price = Column(Float, nullable=False)
+
+class MusicDB(Base):
+    __tablename__ = "music"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    artist = Column(String, nullable=False)
+    genre = Column(String, nullable=False)
+    year_released = Column(Integer, nullable=False)
+    format = Column(String, nullable=False)
+    track_count = Column(Integer, nullable=False)
+    current_market_price = Column(Float, nullable=False)

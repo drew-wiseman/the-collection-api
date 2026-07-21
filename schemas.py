@@ -18,5 +18,40 @@ class GameStats(BaseModel):
     total_market_value: float
     most_expensive_game: Optional[Game] = None
 
+class MovieCreate(BaseModel):
+    title: str
+    genre: str
+    year_released: int
+    studio: str
+    runtime_minutes: int
+    format: Literal["VHS", "DVD", "blu-ray", "videodisc"]
+    actors: str
+    current_market_price: float = Field(gt=0, description="Market price must be greater than zero.")
+
+class Movie(MovieCreate):
+    id: int
+
+class MovieStats(BaseModel):
+    total_movies: int
+    total_market_value: float
+    most_expensive_movie: Optional[Movie] = None
+
+class MusicCreate(BaseModel):
+    title: str
+    artist: str
+    genre: str
+    year_released: int
+    format: Literal["vinyl", "cassette", "CD", "8-track"]
+    track_count: int
+    current_market_price: float = Field(gt=0, description="Market price must be greater than zero.")
+
+class Music(MusicCreate):
+    id: int
+
+class MusicStats(BaseModel):
+    total_albums: int
+    total_market_value: float
+    most_expensive_album: Optional[Music] = None
+
 class DeleteResponse(BaseModel):
     message: str
