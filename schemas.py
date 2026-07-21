@@ -17,7 +17,6 @@ class Game(GameCreate):
 class GameStats(BaseModel):
     total_games: int
     total_market_value: float
-    total_spent: float
     most_expensive_game: Optional[Game] = None
 
 class DeleteResponse(BaseModel):

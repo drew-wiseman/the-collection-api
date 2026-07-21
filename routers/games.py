@@ -55,7 +55,6 @@ def get_games_stats(db: Session = Depends(get_db)):
     stats = {
         "total_games" : db.query(func.count(GameDB.id)).scalar(),
         "total_market_value" : db.query(func.coalesce(func.sum(GameDB.current_market_price), 0)).scalar(),
-        "total_spent" : db.query(func.coalesce(func.sum(GameDB.purchase_price), 0)).scalar(),
         "most_expensive_game" : db.query(GameDB).order_by(GameDB.current_market_price.desc()).first()
     }
     return stats
