@@ -10,6 +10,7 @@ class GameCreate(BaseModel):
     played: bool
     condition: Optional[Literal["loose", "CIB", "sealed"]] = None
     cover_image_url: Optional[str] = None
+    tub_number: int
 
 class Game(GameCreate):
     id: int
@@ -29,6 +30,7 @@ class MovieCreate(BaseModel):
     actors: str
     current_market_price: float = Field(gt=0, description="Market price must be greater than zero.")
     cover_image_url: Optional[str] = None
+    tub_number: int
 
 class Movie(MovieCreate):
     id: int
@@ -47,6 +49,7 @@ class MusicCreate(BaseModel):
     track_count: int
     current_market_price: float = Field(gt=0, description="Market price must be greater than zero.")
     cover_image_url: Optional[str] = None
+    tub_number: int
 
 class Music(MusicCreate):
     id: int

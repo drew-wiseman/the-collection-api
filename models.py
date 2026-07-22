@@ -12,6 +12,7 @@ class GameDB(Base):
     played = Column(Boolean, nullable=False)
     condition = Column(String, nullable=True)
     cover_image_url = Column(String, nullable=True)
+    tub_number = Column(Integer, nullable=False)
 
 class MovieDB(Base):
     __tablename__ = "movies"
@@ -25,6 +26,7 @@ class MovieDB(Base):
     actors = Column(String, nullable=False)
     current_market_price = Column(Float, nullable=False)
     cover_image_url = Column(String, nullable=True)
+    tub_number = Column(Integer, nullable=False)
 
 class MusicDB(Base):
     __tablename__ = "music"
@@ -37,3 +39,4 @@ class MusicDB(Base):
     track_count = Column(Integer, nullable=False)
     current_market_price = Column(Float, nullable=False)
     cover_image_url = Column(String, nullable=True)
+    tub_number = Column(Integer, nullable=False)
