@@ -4,10 +4,10 @@ from typing import Literal, Optional, List
 class GameCreate(BaseModel):
     title: str
     platform: str
-    genre: str
-    year_released: int
-    current_market_price: float = Field(gt=0, description="Market price must be greater than zero.")
-    played: bool
+    genre: Optional[str] = None
+    year_released: Optional[int] = None
+    current_market_price: Optional[float] = Field(default=None, gt=0)
+    played: Optional[bool] = None
     condition: Optional[Literal["loose", "CIB", "sealed"]] = None
     cover_image_url: Optional[str] = None
     tub_number: int
